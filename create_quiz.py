@@ -1,6 +1,6 @@
 import requests
 import json
-
+import subprocess
 
 class Quiz:
     def __init__(self):
@@ -11,7 +11,9 @@ class Quiz:
 
     def get_questions(self):
         self.questions_json = requests.get(
-            "https://opentdb.com/api.php?amount="+str(self.length)+"&category="+str(self.category)).json()
+            "https://opentdb.com/api.php?amount="+str(self.length)+
+            "&category="+str(self.category)
+        ).json()
 
     def save(self):
         with open("quizzes/"+self.name+".json", "w") as f:
@@ -34,8 +36,14 @@ def create_quiz():
 
 def main():
     # list_categories()
-    create_quiz()
+    # create_quiz()
+    command = """
+    -i input.mp4 -vf "drawtext=fontfile=OpenSans-BoldItalic.ttf:text='Stack Overflow':fontcolor=white:fontsize=24:box=1:boxcolor=black@0.5:boxborderw=5:x=(w-text_w)/2:y=(h-text_h)/2" -codec:a copy output.mp4
+"""
+    ffmpeg(command)
 
+class ffmpeg(args):
+    subprocess.run(["ffmpeg", args])
 
 if __name__ == "__main__":
     main()
