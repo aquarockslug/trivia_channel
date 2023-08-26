@@ -1,13 +1,14 @@
 import requests
 import json
 
+
 class Quiz_Creator:
     def prompt_create_quiz():
         Quiz_Creator.list_categories()
         print("---------------------------")
         return Quiz_Creator.create_quiz(
-            input("Enter quiz name: "), 
-            input("Enter quiz length: "), 
+            input("Enter quiz name: "),
+            input("Enter quiz length: "),
             input("Enter category number: ")
         )
 
