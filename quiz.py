@@ -39,7 +39,7 @@ class Quiz:
         self.questions_json: str = None
 
     def get_questions(self):
-        """makes a request, then returns and saves the json response"""
+        """ makes a request, then returns and saves the json response """
         self.questions_json = requests.get(
             "https://opentdb.com/api.php?amount="+str(self.length) +
             "&category="+str(self.category)
