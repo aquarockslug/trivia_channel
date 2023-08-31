@@ -12,7 +12,7 @@ def main():
 
     quiz = open_quiz("Sports")
     # quiz = Quiz_Creator.prompt_create_quiz()
-    # quizzes Quiz_Creator.create_quizzes(amount=2, length=3)
+    # quizzes = Quiz_Creator.create_quizzes(amount=2, length=3)
         
     # VIDEO
 
