@@ -1,6 +1,7 @@
-import subprocess
 import json
-from quiz import Quiz_Creator, Quiz
+import subprocess
+
+from quiz import Quiz_Creator
 from video import Slide
 
 # convert to video:
@@ -8,27 +9,36 @@ from video import Slide
 
 
 def main():
+    """MAIN"""
     # QUIZ
 
     quiz = open_quiz("Sports")
     # quiz = Quiz_Creator.prompt_create_quiz()
     # quizzes = Quiz_Creator.create_quizzes(amount=2, length=3)
-        
+
     # VIDEO
 
-    s = Slide("cubes.mp4")
-    s.add_title(quiz["name"])
-    # s.add_question(quiz.question, quiz.incorrect, quiz.correct)
+    Slide("title", "cubes.mp4").add_title(quiz["name"])
+    slide = Slide("q1", "cubes.mp4")
 
-    open_video("slides/output")
+    q_1 = quiz["questions_json"][0]
+    slide.add_question(q_1["question"], q_1["incorrect_answers"], q_1["correct_answer"])
+
+    open_video("slides/title")
+    open_video("slides/q1")
+
 
 def open_quiz(name):
+    """OPEN QUIZ"""
     quiz = None
-    with open("quizzes/"+name+".json") as f:
-        quiz = json.loads(f.read())
+    with open("quizzes/" + name + ".json", "r", encoding="UTF") as file:
+        quiz = json.loads(file.read())
     return quiz
 
-def open_video(path): subprocess.run(["vlc", path+".mp4"])
+
+def open_video(path):
+    """OPEN WITH VLC"""
+    subprocess.run(["vlc", path + ".mp4"])
 
 
 if __name__ == "__main__":

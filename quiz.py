@@ -1,5 +1,6 @@
-import requests
 import json
+
+import requests
 
 
 class Quiz_Creator:
@@ -17,7 +18,7 @@ class Quiz_Creator:
             for c in json.loads(f.read())[0]["trivia_categories"]:
                 print(c["id"], "-", c["name"])
 
-    def create_quizzes(name: str = "quiz", amount: int = 1, length: int = 1, category: int = 9):
+    def create_quizzes(self, name: str = "quiz", amount: int = 1, length: int = 1, category: int = 9):
         quizzes = []
         for i in range(0, amount):
             quizzes.append(Quiz_Creator.create_quiz(
