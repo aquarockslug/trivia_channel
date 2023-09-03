@@ -4,20 +4,24 @@ import requests
 
 
 class Quiz_Creator:
+    """ quiz factory """
+    @staticmethod
     def prompt_create_quiz():
         Quiz_Creator.list_categories()
         print("---------------------------")
         return Quiz_Creator.create_quiz(
             input("Enter quiz name: "),
-            input("Enter quiz length: "),
-            input("Enter category number: ")
+            int(input("Enter quiz length: ")),
+            int(input("Enter category number: "))
         )
 
+    @staticmethod
     def list_categories():
         with open("categories.json", "r") as f:
             for c in json.loads(f.read())[0]["trivia_categories"]:
                 print(c["id"], "-", c["name"])
 
+    @staticmethod
     def create_quizzes(self, name: str = "quiz", amount: int = 1, length: int = 1, category: int = 9):
         quizzes = []
         for i in range(0, amount):
@@ -25,11 +29,12 @@ class Quiz_Creator:
                 name+"_"+str(i+1), length, category))
         return quizzes
 
+    @staticmethod
     def create_quiz(name: str, length: int, category: int):
-        q = Quiz(name, length, category)
-        q.get_questions()
-        q.save_json_file()
-        return q
+        new_quiz = Quiz(name, length, category)
+        new_quiz.get_questions()
+        new_quiz.save_json_file()
+        return new_quiz
 
 
 class Quiz:

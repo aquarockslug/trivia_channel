@@ -10,14 +10,13 @@ class Slide:
     def __init__(self, name, background):
         self.name = name
         self.background = background
-        quarter_from_bottom = "((h-text_h) - (h-text_h)/4)"
         self.pos = {
             "center": ("(w-text_w)/2", "(h-text_h)/2"),
             "top": ("(w-text_w)/2", "(h-text_h)/4"),
-            "a1": ("(w-text_w)/4", quarter_from_bottom),
-            "a2": ("(w-text_w)/4", quarter_from_bottom),
-            "a3": ("(w-text_w)/4", quarter_from_bottom),
-            "a4": ("(w-text_w)/4", quarter_from_bottom),
+            "a1": ("(w-text_w)/4", "((h-text_h) - (h-text_h)/4)"),
+            "a2": ("((w-text_w) - (w-text_w)/4)", "((h-text_h) - (h-text_h)/4)"),
+            "a3": ("(w-text_w)/4", "((h-text_h) - (h-text_h)/8)"),
+            "a4": ("((w-text_w) - (w-text_w)/4)", "((h-text_h) - (h-text_h)/8)"),
         }
 
     def text_box_args(self):
@@ -30,13 +29,16 @@ class Slide:
 
     def add_question(self, question, incorrect, correct):
         ffmpeg_text_args = []
-        ffmpeg_text_args.append(self.add_text(question, 32, *self.pos["top"]))
-        ffmpeg_text_args.append(self.add_text(incorrect[0], 24, *self.pos["a1"]))
-        ffmpeg_text_args.append(self.add_text(incorrect[1], 24, *self.pos["a2"]))
-        ffmpeg_text_args.append(self.add_text(incorrect[2], 24, *self.pos["a3"]))
-        ffmpeg_text_args.append(self.add_text(correct, 24, *self.pos["a4"]))
+        ffmpeg_text_args.append(self.create_text_arg(question, 32, *self.pos["top"]))
+        ffmpeg_text_args.append(self.create_text_arg(incorrect[0], 24, *self.pos["a1"]))
+        ffmpeg_text_args.append(self.create_text_arg(incorrect[1], 24, *self.pos["a2"]))
+        ffmpeg_text_args.append(self.create_text_arg(incorrect[2], 24, *self.pos["a3"]))
+        ffmpeg_text_args.append(self.create_text_arg(correct, 24, *self.pos["a4"]))
+        self.apply_ffmpeg_args(ffmpeg_text_args)
 
-        for slide_index, slide in enumerate(ffmpeg_text_args):
+        
+    def apply_ffmpeg_args(self, ffmpeg_args):
+        for slide_index, slide in enumerate(ffmpeg_args):
             if slide_index == 0:
                 ffmpeg(("-i", self.background, "-vf") + slide)
             else:
@@ -49,13 +51,14 @@ class Slide:
             ["mv", "temp/" + self.name + ".mp4", "slides/" + self.name + ".mp4"]
         )
 
+
     def add_title(self, title: str):
         ffmpeg(
             ("-i", self.background, "-vf")
-            + self.add_text(title, 196, *self.pos["center"])
+            + self.create_text_arg(title, 196, *self.pos["center"])
         )
 
-    def add_text(self, text, font_size, x, y):
+    def create_text_arg(self, text, font_size, x, y):
         """returns ffmpeg args which add the given text at the coordinates"""
         filter_args = [
             ["fontfile", "OpenSans-BoldItalic.ttf"],
