@@ -36,13 +36,12 @@ class Slide:
         ffmpeg_text_args.append(self.create_text_arg(correct, 24, *self.pos["a4"]))
         self.apply_ffmpeg_args(ffmpeg_text_args)
 
-        
     def apply_ffmpeg_args(self, ffmpeg_args):
-        for slide_index, slide in enumerate(ffmpeg_args):
+        for slide_index, arg in enumerate(ffmpeg_args):
             if slide_index == 0:
-                ffmpeg(("-i", self.background, "-vf") + slide)
+                ffmpeg(("-i", self.background, "-vf") + arg)
             else:
-                ffmpeg(("-i", "temp/" + self.name + ".mp4", "-vf") + slide)
+                ffmpeg(("-i", "temp/" + self.name + ".mp4", "-vf") + arg)
             subprocess.run(
                 ["mv", "slides/" + self.name + ".mp4", "temp/" + self.name + ".mp4"]
             )
@@ -50,7 +49,6 @@ class Slide:
         subprocess.run(
             ["mv", "temp/" + self.name + ".mp4", "slides/" + self.name + ".mp4"]
         )
-
 
     def add_title(self, title: str):
         ffmpeg(
@@ -83,6 +81,9 @@ class Slide:
             filter_args_str += arg[0] + "=" + arg[1] + ":"
         print(filter_args_str)
         return filter_args_str
+
+    def delete(self):
+        subprocess.run(["rm", "slides/" + self.name + ".mp4"])
 
 
 def ffmpeg(args):

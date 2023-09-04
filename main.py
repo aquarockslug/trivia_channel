@@ -12,20 +12,34 @@ def main():
     """MAIN"""
     # QUIZ
 
-    quiz = open_quiz("Sports")
-    # quiz = Quiz_Creator.prompt_create_quiz()
+    prompt = True
+
+    quiz_questions = None
+    if prompt:
+        quiz = Quiz_Creator.prompt_create_quiz()  # obj
+        quiz_questions = quiz.get_questions()  # obj -> json
+    else:
+        quiz_questions = open_quiz("Sports")  # json
+
     # quizzes = Quiz_Creator.create_quizzes(amount=2, length=3)
 
     # VIDEO
+    # Slide("title", "cubes.mp4").add_title(quiz["name"])
 
-    Slide("title", "cubes.mp4").add_title(quiz["name"])
-    slide = Slide("q1", "cubes.mp4")
+    for index, question in enumerate(quiz["questions_json"]):
+        curr_slide = Slide("q" + str(index + 1), "cubes.mp4")
+        if question["type"] == "multiple":
+            curr_slide.add_question(
+                question["question"],
+                question["incorrect_answers"],
+                question["correct_answer"],
+            )
+        else:
+            curr_slide.delete()
 
-    q_1 = quiz["questions_json"][0]
-    slide.add_question(q_1["question"], q_1["incorrect_answers"], q_1["correct_answer"])
-
-    open_video("slides/title")
-    open_video("slides/q1")
+    # open_video("slides/title")
+    # open_video("slides/q1")
+    # open_video("slides/q1")
 
 
 def open_quiz(name):
