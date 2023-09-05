@@ -21,7 +21,7 @@ class Slide:
         }
 
     def __str__(self):
-        return self.name + " - " + self.background + " - " + str(self.duration) + "\n"
+        return self.name + " - " + self.background + " - " + str(self.duration) + "s \n"
 
     def text_box_args(self):
         return [
@@ -31,7 +31,12 @@ class Slide:
             ["boxborderw", "5"],
         ]
 
-    def add_question(self, question, incorrect, correct):
+    def add_question(self, question):
+        question, incorrect, correct = (
+            question["question"],
+            question["incorrect_answers"],
+            question["correct_answer"],
+        )
         ffmpeg_text_args = []
         ffmpeg_text_args.append(self.create_text_arg(question, 32, *self.pos["top"]))
         ffmpeg_text_args.append(self.create_text_arg(incorrect[0], 24, *self.pos["a1"]))

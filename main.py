@@ -15,7 +15,7 @@ def main():
 
     include_title_slide = False
     debug = False
-    new_quiz = True
+    new_quiz = False
 
     quiz_questions = {}
     if new_quiz:
@@ -41,11 +41,7 @@ def main():
             curr_slide.delete()
             continue
 
-        curr_slide.add_question(
-            question["question"],
-            question["incorrect_answers"],
-            question["correct_answer"],
-        )
+        curr_slide.add_question(question)
         successful_slides.append(curr_slide)
 
     print_slide_status(successful_slides)
