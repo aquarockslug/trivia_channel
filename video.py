@@ -7,9 +7,10 @@ import subprocess
 class Slide:
     """segment of video"""
 
-    def __init__(self, name, background):
+    def __init__(self, name, background, duration):
         self.name = name
         self.background = background
+        self.duration = duration
         self.pos = {
             "center": ("(w-text_w)/2", "(h-text_h)/2"),
             "top": ("(w-text_w)/2", "(h-text_h)/4"),
@@ -18,6 +19,9 @@ class Slide:
             "a3": ("(w-text_w)/4", "((h-text_h) - (h-text_h)/8)"),
             "a4": ("((w-text_w) - (w-text_w)/4)", "((h-text_h) - (h-text_h)/8)"),
         }
+
+    def __str__(self):
+        return self.name + " - " + self.background + " - " + str(self.duration) + "\n"
 
     def text_box_args(self):
         return [

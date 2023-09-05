@@ -4,7 +4,8 @@ import requests
 
 
 class Quiz_Creator:
-    """ quiz factory """
+    """quiz factory"""
+
     @staticmethod
     def prompt_create_quiz():
         Quiz_Creator.list_categories()
@@ -12,7 +13,7 @@ class Quiz_Creator:
         return Quiz_Creator.create_quiz(
             input("Enter quiz name: "),
             int(input("Enter quiz length: ")),
-            int(input("Enter category number: "))
+            int(input("Enter category number: ")),
         )
 
     @staticmethod
@@ -22,17 +23,20 @@ class Quiz_Creator:
                 print(c["id"], "-", c["name"])
 
     @staticmethod
-    def create_quizzes(self, name: str = "quiz", amount: int = 1, length: int = 1, category: int = 9):
+    def create_quizzes(
+        name: str = "quiz", amount: int = 1, length: int = 1, category: int = 9
+    ):
         quizzes = []
         for i in range(0, amount):
-            quizzes.append(Quiz_Creator.create_quiz(
-                name+"_"+str(i+1), length, category))
+            quizzes.append(
+                Quiz_Creator.create_quiz(name + "_" + str(i + 1), length, category)
+            )
         return quizzes
 
     @staticmethod
     def create_quiz(name: str, length: int, category: int):
         new_quiz = Quiz(name, length, category)
-        new_quiz.get_questions()
+        new_quiz.request_questions()
         new_quiz.save_json_file()
         return new_quiz
 
@@ -42,16 +46,24 @@ class Quiz:
         self.name: str = name
         self.length: int = length
         self.category: int = category
-        self.questions_json: str = None
+        self.questions: dict = {}
 
-    def get_questions(self):
-        """ makes a request, then returns and saves the json response """
-        self.questions_json = requests.get(
-            "https://opentdb.com/api.php?amount="+str(self.length) +
-            "&category="+str(self.category)
+    def request_questions(self):
+        """makes a request, then returns and saves the json response"""
+        self.questions = requests.get(
+            "https://opentdb.com/api.php?amount="
+            + str(self.length)
+            + "&category="
+            + str(self.category)
         ).json()["results"]
-        return self.questions_json
+        return self.questions
+
+    def get_questions(self) -> dict:
+        return self.questions
+
+    def get_name(self) -> str:
+        return self.name
 
     def save_json_file(self):
-        with open("quizzes/"+self.name+".json", "w") as f:
+        with open("quizzes/" + self.name + ".json", "w") as f:
             f.write(json.dumps(vars(self)))

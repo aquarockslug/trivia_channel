@@ -1,5 +1,6 @@
 import json
 import subprocess
+from pprint import pprint
 
 from quiz import Quiz_Creator
 from video import Slide
@@ -12,42 +13,61 @@ def main():
     """MAIN"""
     # QUIZ
 
-    prompt = True
+    include_title_slide = False
+    debug = False
+    new_quiz = True
 
-    quiz_questions = None
-    if prompt:
-        quiz = Quiz_Creator.prompt_create_quiz()  # obj
-        quiz_questions = quiz.get_questions()  # obj -> json
+    quiz_questions = {}
+    if new_quiz:
+        new_quiz = Quiz_Creator.prompt_create_quiz()
+        quiz_questions: dict = new_quiz.get_questions()
+        new_quiz_name = new_quiz.name
     else:
-        quiz_questions = open_quiz("Sports")  # json
+        new_quiz = open_quiz_dict(input("Select quiz to open: "))
+        quiz_questions = new_quiz["questions"]
+        new_quiz_name = new_quiz["name"]
 
     # quizzes = Quiz_Creator.create_quizzes(amount=2, length=3)
 
     # VIDEO
-    # Slide("title", "cubes.mp4").add_title(quiz["name"])
-
-    for index, question in enumerate(quiz["questions_json"]):
-        curr_slide = Slide("q" + str(index + 1), "cubes.mp4")
-        if question["type"] == "multiple":
-            curr_slide.add_question(
-                question["question"],
-                question["incorrect_answers"],
-                question["correct_answer"],
-            )
-        else:
+    if include_title_slide:
+        Slide("title", "cubes.mp4", 2).add_title(new_quiz_name)
+    if debug:
+        pprint(quiz_questions)
+    successful_slides = []
+    for index, question in enumerate(quiz_questions):
+        curr_slide = Slide("q" + str(index + 1), "cubes.mp4", 2)
+        if question["type"] != "multiple":
             curr_slide.delete()
+            continue
+
+        curr_slide.add_question(
+            question["question"],
+            question["incorrect_answers"],
+            question["correct_answer"],
+        )
+        successful_slides.append(curr_slide)
+
+    print_slide_status(successful_slides)
 
     # open_video("slides/title")
     # open_video("slides/q1")
-    # open_video("slides/q1")
 
 
-def open_quiz(name):
+def print_slide_status(slides):
+    out_str = "\n" + str(len(slides)) + " slides created: \n"
+    for curr_slide in slides:
+        if not isinstance(curr_slide, Slide):
+            continue
+        out_str += str(curr_slide)
+    print(out_str[:-1])
+
+def open_quiz_dict(name) -> dict:
     """OPEN QUIZ"""
-    quiz = None
+    quiz_dict = {}
     with open("quizzes/" + name + ".json", "r", encoding="UTF") as file:
-        quiz = json.loads(file.read())
-    return quiz
+        quiz_dict = json.loads(file.read())
+    return quiz_dict
 
 
 def open_video(path):
