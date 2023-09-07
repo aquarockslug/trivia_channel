@@ -11,6 +11,8 @@ class Slide:
         self.name = name
         self.background = background
         self.duration = duration
+        self.question_size = 64
+        self.answer_size = 48
         self.pos = {
             "center": ("(w-text_w)/2", "(h-text_h)/2"),
             "top": ("(w-text_w)/2", "(h-text_h)/4"),
@@ -31,19 +33,33 @@ class Slide:
             ["boxborderw", "5"],
         ]
 
-    def add_question(self, question):
+    def add_question(self, question_slide):
         question, incorrect, correct = (
-            question["question"],
-            question["incorrect_answers"],
-            question["correct_answer"],
+            question_slide["question"],
+            question_slide["incorrect_answers"],
+            question_slide["correct_answer"],
         )
+        if len(question) >= 40:
+            question = self.add_linebreak(question)
+        slide_args = [
+            ( question, self.question_size, *self.pos["top"]),
+            (incorrect[0], self.answer_size, *self.pos["a1"]),
+            (incorrect[1], self.answer_size, *self.pos["a2"]),
+            (incorrect[2], self.answer_size, *self.pos["a3"]),
+            (correct, self.answer_size, *self.pos["a4"]),
+        ]
         ffmpeg_text_args = []
-        ffmpeg_text_args.append(self.create_text_arg(question, 32, *self.pos["top"]))
-        ffmpeg_text_args.append(self.create_text_arg(incorrect[0], 24, *self.pos["a1"]))
-        ffmpeg_text_args.append(self.create_text_arg(incorrect[1], 24, *self.pos["a2"]))
-        ffmpeg_text_args.append(self.create_text_arg(incorrect[2], 24, *self.pos["a3"]))
-        ffmpeg_text_args.append(self.create_text_arg(correct, 24, *self.pos["a4"]))
+        for args in slide_args:
+            ffmpeg_text_args.append(self.create_text_arg(*args))
         self.apply_ffmpeg_args(ffmpeg_text_args)
+
+    def add_linebreak(self, text):
+        linebreak = int((len(text) / 2))
+        while linebreak < len(text):
+            if text[linebreak] == " ":
+                break
+            linebreak += 1
+        return text[:linebreak] + "\n" + text[linebreak:]
 
     def apply_ffmpeg_args(self, ffmpeg_args):
         for slide_index, arg in enumerate(ffmpeg_args):
