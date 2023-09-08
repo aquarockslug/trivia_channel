@@ -1,5 +1,5 @@
 import json
-
+import re
 import requests
 
 
@@ -37,6 +37,7 @@ class Quiz_Creator:
     def create_quiz(name: str, length: int, category: int):
         new_quiz = Quiz(name, length, category)
         new_quiz.request_questions()
+        new_quiz.clean_text()
         new_quiz.save_json_file()
         return new_quiz
 
@@ -58,6 +59,12 @@ class Quiz:
         ).json()["results"]
         return self.questions
 
+    def clean_text(self):
+        CLEANR = re.compile('<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});')
+        for text in self.questions:
+            print(text)
+            text = re.sub(CLEANR, '', text["question"])
+
     def get_questions(self) -> dict:
         return self.questions
 
@@ -67,3 +74,6 @@ class Quiz:
     def save_json_file(self):
         with open("quizzes/" + self.name + ".json", "w") as f:
             f.write(json.dumps(vars(self)))
+
+if __name__ == '__main__':
+    Quiz_Creator.prompt_create_quiz()

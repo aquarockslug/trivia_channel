@@ -53,6 +53,10 @@ class Slide:
             ffmpeg_text_args.append(self.create_text_arg(*args))
         self.apply_ffmpeg_args(ffmpeg_text_args)
 
+    def add_answer():
+        answer_args = ("Answer Test", 60, *self.pos["top"])
+        self.apply_ffmpeg_args(self.create_text_arg(*answer_args))
+
     def add_linebreak(self, text):
         linebreak = int((len(text) / 2))
         while linebreak < len(text):

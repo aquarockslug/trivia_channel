@@ -28,30 +28,49 @@ def main():
         new_quiz_name = new_quiz["name"]
 
     # quizzes = Quiz_Creator.create_quizzes(amount=2, length=3)
+    if debug:
+        pprint(quiz_questions)
 
     # VIDEO
     if include_title_slide:
         Slide("title", "cubes.mp4", 2).add_title(new_quiz_name)
-    if debug:
-        pprint(quiz_questions)
-    successful_slides = []
-    for index, question in enumerate(quiz_questions):
-        curr_slide = Slide("q" + str(index + 1), "cubes.mp4", 2)
-        if question["type"] != "multiple":
-            curr_slide.delete()
-            continue
+    
+    question_slides = set(add_questions(quiz_questions))
+ 
+    if not question_slides:
+        print("No questions found")   
 
-        curr_slide.add_question(question)
-        successful_slides.append(curr_slide)
+    # remove empty slides from slides dir?
+    print_slide_status(question_slides)
 
-    print_slide_status(successful_slides)
+    for slide in question_slides:
+        pprint(slide[0].name + " and " + slide[1].name)
 
     # open_video("slides/title")
     # open_video("slides/q1")
 
 
+def add_questions(questions):
+    question_slides, answer_slides = [], []
+    for index, question in enumerate(questions):
+        # create question slide
+        curr_slide = Slide("q" + str(index + 1), "cubes.mp4", 10)
+        if question["type"] != "multiple":
+            curr_slide.delete()
+            continue
+        curr_slide.add_question(question)
+        question_slides.append(curr_slide)
+
+        # create answer slide
+        answer_slide = Slide("a" + str(index+1), "cubes.mp4", 2)
+        #answer_slide.add_answer()
+        answer_slides.append(answer_slide)
+
+    return zip(question_slides, answer_slides)
+
+
 def print_slide_status(slides):
-    out_str = "\n" + str(len(slides)) + " slides created: \n"
+    out_str = "\n" + str(len(slides)) + " questions created: \n"
     for curr_slide in slides:
         if not isinstance(curr_slide, Slide):
             continue
