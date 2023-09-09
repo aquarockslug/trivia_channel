@@ -1,4 +1,5 @@
 import json
+import os
 import subprocess
 from pprint import pprint
 
@@ -11,12 +12,14 @@ from video import Slide
 
 def main():
     """MAIN"""
-    # QUIZ
 
-    include_title_slide = False
+    # CONFIG
+    include_title_slide = True
+    create_question_slides = True
     debug = False
     new_quiz = False
 
+    # QUIZ
     quiz_questions = {}
     if new_quiz:
         new_quiz = Quiz_Creator.prompt_create_quiz()
@@ -33,18 +36,25 @@ def main():
 
     # VIDEO
     if include_title_slide:
-        Slide("title", "cubes.mp4", 2).add_title(new_quiz_name)
-    
-    question_slides = set(add_questions(quiz_questions))
- 
+        Slide("title", "img/cubes.jpg", "bg_video/cube2.mp4", 5).add_title(
+            new_quiz_name
+        )
+
+    question_slides = (
+        set(add_questions(quiz_questions)) if create_question_slides else ""
+    )
+
     if not question_slides:
-        print("No questions found")   
+        print("No questions found")
+        return
 
-    # remove empty slides from slides dir?
+    # remove empty slides and print status
     print_slide_status(question_slides)
-
     for slide in question_slides:
-        pprint(slide[0].name + " and " + slide[1].name)
+        if os.path.getsize("slides/" + slide[0].name + ".mp4") > 0:
+            pprint(slide[0].name + " and " + slide[1].name)
+        else:
+            slide[0].delete()
 
     # open_video("slides/title")
     # open_video("slides/q1")
@@ -62,8 +72,8 @@ def add_questions(questions):
         question_slides.append(curr_slide)
 
         # create answer slide
-        answer_slide = Slide("a" + str(index+1), "cubes.mp4", 2)
-        #answer_slide.add_answer()
+        answer_slide = Slide("a" + str(index + 1), "cubes.mp4", 2)
+        # answer_slide.add_answer()
         answer_slides.append(answer_slide)
 
     return zip(question_slides, answer_slides)
@@ -76,6 +86,7 @@ def print_slide_status(slides):
             continue
         out_str += str(curr_slide)
     print(out_str[:-1])
+
 
 def open_quiz_dict(name) -> dict:
     """OPEN QUIZ"""

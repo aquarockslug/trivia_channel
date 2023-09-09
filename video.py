@@ -1,16 +1,24 @@
 import subprocess
 
-# convert to video:
-# ffmpeg -framerate 1 -i happy%d.jpg -c:v libx264 -r 30 -pix_fmt yuv420p output.mp4
-
 
 class Slide:
     """segment of video"""
 
-    def __init__(self, name, background, duration):
+    def __init__(
+        self,
+        name="cube",
+        background="img/cube.jpg",
+        video_path="bg_video/cube.mp4",
+        duration=1,
+    ):
         self.name = name
-        self.background = background
         self.duration = duration
+        self.background = background
+        self.video = video_path
+
+        # create video from background + duration
+        self.make_bg_video()
+
         self.question_size = 64
         self.answer_size = 48
         self.pos = {
@@ -24,6 +32,23 @@ class Slide:
 
     def __str__(self):
         return self.name + " - " + self.background + " - " + str(self.duration) + "s \n"
+
+    def make_bg_video(self):
+        ffmpeg(
+            [
+                "-framerate",
+                str(self.duration),
+                "-i",
+                self.background,
+                "-c:v",
+                "libx264",
+                "-r",
+                "30",
+                "-pix_fmt",
+                "yuv420p",
+                self.video,
+            ]
+        )
 
     def text_box_args(self):
         return [
@@ -42,7 +67,7 @@ class Slide:
         if len(question) >= 40:
             question = self.add_linebreak(question)
         slide_args = [
-            ( question, self.question_size, *self.pos["top"]),
+            (question, self.question_size, *self.pos["top"]),
             (incorrect[0], self.answer_size, *self.pos["a1"]),
             (incorrect[1], self.answer_size, *self.pos["a2"]),
             (incorrect[2], self.answer_size, *self.pos["a3"]),
@@ -53,7 +78,7 @@ class Slide:
             ffmpeg_text_args.append(self.create_text_arg(*args))
         self.apply_ffmpeg_args(ffmpeg_text_args)
 
-    def add_answer():
+    def add_answer(self):
         answer_args = ("Answer Test", 60, *self.pos["top"])
         self.apply_ffmpeg_args(self.create_text_arg(*answer_args))
 
@@ -81,7 +106,7 @@ class Slide:
 
     def add_title(self, title: str):
         ffmpeg(
-            ("-i", self.background, "-vf")
+            ("-i", self.video, "-vf")
             + self.create_text_arg(title, 196, *self.pos["center"])
         )
 
@@ -116,4 +141,6 @@ class Slide:
 
 
 def ffmpeg(args):
+    # if type(args) is str:
+    # subprocess.run(["ffmpeg", ])
     subprocess.run(["ffmpeg", *args])
