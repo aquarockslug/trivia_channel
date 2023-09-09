@@ -15,6 +15,7 @@ def main():
 
     # CONFIG
     include_title_slide = True
+    title_duration = 5
     create_question_slides = True
     debug = False
     new_quiz = False
@@ -34,9 +35,12 @@ def main():
     if debug:
         pprint(quiz_questions)
 
+    # IMAGE
+    scale_img("img/cubes_small.jpg", "img/cubes.jpg")
+
     # VIDEO
     if include_title_slide:
-        Slide("title", "img/cubes.jpg", "bg_video/cube2.mp4", 5).add_title(
+        Slide("title", "img/cubes.jpg", "bg_video/cube2.mp4", title_duration).add_title(
             new_quiz_name
         )
 
@@ -60,11 +64,13 @@ def main():
     # open_video("slides/q1")
 
 
-def add_questions(questions):
+def add_questions(questions, q_duration=1, a_duration=1):
     question_slides, answer_slides = [], []
     for index, question in enumerate(questions):
         # create question slide
-        curr_slide = Slide("q" + str(index + 1), "cubes.mp4", 10)
+        curr_slide = Slide(
+            "q" + str(index + 1), "img/cubes.jpg", "bg_video/cubes.mp4", q_duration
+        )
         if question["type"] != "multiple":
             curr_slide.delete()
             continue
@@ -72,7 +78,9 @@ def add_questions(questions):
         question_slides.append(curr_slide)
 
         # create answer slide
-        answer_slide = Slide("a" + str(index + 1), "cubes.mp4", 2)
+        answer_slide = Slide(
+            "a" + str(index + 1), "img/cubes.jpg", "bg_video/cubes.mp4", a_duration
+        )
         # answer_slide.add_answer()
         answer_slides.append(answer_slide)
 
@@ -99,6 +107,10 @@ def open_quiz_dict(name) -> dict:
 def open_video(path):
     """OPEN WITH VLC"""
     subprocess.run(["vlc", path + ".mp4"])
+
+
+def scale_img(input_path, output_path):
+    subprocess.run(["ffmpeg", "-i", input_path, "-vf", "scale=1920:1080", output_path])
 
 
 if __name__ == "__main__":

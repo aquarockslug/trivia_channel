@@ -37,7 +37,7 @@ class Slide:
         ffmpeg(
             [
                 "-framerate",
-                str(self.duration),
+                "1/"+str(self.duration),
                 "-i",
                 self.background,
                 "-c:v",
