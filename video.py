@@ -33,11 +33,14 @@ class Slide:
     def __str__(self):
         return self.name + " - " + self.background + " - " + str(self.duration) + "s \n"
 
+    def get_answers(self):
+        return ["test_" + str(i) for i in range(10)]
+
     def make_bg_video(self):
         ffmpeg(
             [
                 "-framerate",
-                "1/"+str(self.duration),
+                "1/" + str(self.duration),
                 "-i",
                 self.background,
                 "-c:v",
@@ -78,10 +81,6 @@ class Slide:
             ffmpeg_text_args.append(self.create_text_arg(*args))
         self.apply_ffmpeg_args(ffmpeg_text_args)
 
-    def add_answer(self):
-        answer_args = ("Answer Test", 60, *self.pos["top"])
-        self.apply_ffmpeg_args(self.create_text_arg(*answer_args))
-
     def add_linebreak(self, text):
         linebreak = int((len(text) / 2))
         while linebreak < len(text):
@@ -108,6 +107,12 @@ class Slide:
         ffmpeg(
             ("-i", self.video, "-vf")
             + self.create_text_arg(title, 196, *self.pos["center"])
+        )
+
+    def add_answer(self, answer):
+        ffmpeg(
+            ("-i", self.video, "-vf")
+            + self.create_text_arg(answer, 144, *self.pos["center"])
         )
 
     def create_text_arg(self, text, font_size, x, y):
