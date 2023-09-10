@@ -14,14 +14,14 @@ def main():
     """creates quizzes and slides, then adds the questions and answers
     for the quiz to each slide"""
 
-    # CONFIG
+    # CONFIG ##############################################
     new_quiz = True
     include_title_slide = True
     title_duration = 5
     create_question_slides = True
     debug = False
 
-    # QUIZ
+    # QUIZ ################################################
     quiz_questions = {}
     if new_quiz:  # TODO should make new Quiz object even if not a new quiz
         new_quiz = Quiz_Creator.prompt_create_quiz()
@@ -30,19 +30,16 @@ def main():
     else:
         new_quiz = open_quiz_dict(input("Select quiz to open: "))
         quiz_questions = new_quiz["questions"]
-        # quiz_questions = zip()
         new_quiz_name = new_quiz["name"]
 
     # quizzes = Quiz_Creator.create_quizzes(amount=2, length=3)
     if debug:
         pprint(quiz_questions)
 
-    # IMAGE
+    # IMAGE ###############################################
     scale_img("img/cubes_small.jpg", "img/cubes.jpg")
 
-    # VIDEO
-
-    # TODO quiz_questions as tuple (quiz_questions, quiz_answer)
+    # VIDEO ###############################################
 
     # create title
     if include_title_slide:
@@ -51,6 +48,7 @@ def main():
         )
 
     # create question slides: (question_slide, answer_slide)
+    # TODO get answers out of quiz_questions to make it (quiz_questions: [""], quiz_answers: [""])
     question_slides = (
         set(add_question_slides(quiz_questions)) if create_question_slides else ""
     )
@@ -88,6 +86,7 @@ def add_question_slides(questions, q_duration=1, a_duration=1):
         answer_slide = Slide(
             "a" + str(index + 1), "img/cubes.jpg", "bg_video/cubes_a.mp4", a_duration
         )
+
         answer_slide.add_answer(answer)
         answer_slides.append(answer_slide)
 
