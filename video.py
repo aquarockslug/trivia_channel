@@ -8,16 +8,10 @@ class Slide:
         self,
         name="cube",
         background="img/cube.jpg",
-        video_path="bg_video/cube.mp4",
-        duration=1,
     ):
         self.name = name
-        self.duration = duration
+        self.path = "slides/" + name + ".jpg"
         self.background = background
-        self.video = video_path
-
-        # create video from background + duration
-        self.make_bg_video()
 
         self.question_size = 64
         self.answer_size = 48
@@ -31,55 +25,15 @@ class Slide:
         }
 
     def __str__(self):
-        return self.name + " - " + self.background + " - " + str(self.duration) + "s \n"
-
-    def get_answers(self):
-        return ["test_" + str(i) for i in range(10)]
-
-    def make_bg_video(self):
-        ffmpeg(
-            [
-                "-framerate",
-                "1/" + str(self.duration),
-                "-i",
-                self.background,
-                "-c:v",
-                "libx264",
-                "-r",
-                "30",
-                "-pix_fmt",
-                "yuv420p",
-                self.video,
-            ]
-        )
+        return self.name + " - " + self.background
 
     def text_box_args(self):
         return [
             ["fontcolor", "white"],
             ["box", "1"],
-            ["boxcolor", "black@0.8"],
-            ["boxborderw", "5"],
+            ["boxcolor", "black@0.7"],
+            ["boxborderw", "15"],
         ]
-
-    def add_question(self, question_slide):
-        question, incorrect, correct = (
-            question_slide["question"],
-            question_slide["incorrect_answers"],
-            question_slide["correct_answer"],
-        )
-        if len(question) >= 40:
-            question = self.add_linebreak(question)
-        slide_args = [
-            (question, self.question_size, *self.pos["top"]),
-            (incorrect[0], self.answer_size, *self.pos["a1"]),
-            (incorrect[1], self.answer_size, *self.pos["a2"]),
-            (incorrect[2], self.answer_size, *self.pos["a3"]),
-            (correct, self.answer_size, *self.pos["a4"]),
-        ]
-        ffmpeg_text_args = []
-        for args in slide_args:
-            ffmpeg_text_args.append(self.create_text_arg(*args))
-        self.apply_ffmpeg_args(ffmpeg_text_args)
 
     def add_linebreak(self, text):
         linebreak = int((len(text) / 2))
@@ -89,31 +43,42 @@ class Slide:
             linebreak += 1
         return text[:linebreak] + "\n" + text[linebreak:]
 
-    def apply_ffmpeg_args(self, ffmpeg_args):
-        for slide_index, arg in enumerate(ffmpeg_args):
-            if slide_index == 0:
-                ffmpeg(("-i", self.background, "-vf") + arg)
-            else:
-                ffmpeg(("-i", "temp/" + self.name + ".mp4", "-vf") + arg)
-            subprocess.run(
-                ["mv", "slides/" + self.name + ".mp4", "temp/" + self.name + ".mp4"]
-            )
-
-        subprocess.run(
-            ["mv", "temp/" + self.name + ".mp4", "slides/" + self.name + ".mp4"]
-        )
-
     def add_title(self, title: str):
-        ffmpeg(
-            ("-i", self.video, "-vf")
-            + self.create_text_arg(title, 196, *self.pos["center"])
+        self.ffmpeg(
+            (
+                "-i",
+                self.background,
+                "-vf",
+                self.create_text_arg(title, 196, *self.pos["center"]),
+                "slides/" + self.name + ".jpg",
+            )
         )
 
     def add_answer(self, answer):
-        ffmpeg(
-            ("-i", self.video, "-vf")
-            + self.create_text_arg(answer, 144, *self.pos["center"])
+        self.ffmpeg(
+            (
+                "-i",
+                self.background,
+                "-vf",
+                self.create_text_arg(answer, 144, *self.pos["center"]),
+                "slides/" + self.name + ".jpg",
+            )
         )
+
+    def add_guesses(self, prompt, guesses):
+        if len(prompt) >= 40:
+            prompt = self.add_linebreak(prompt)
+        slide_args = [
+            (prompt, self.question_size, *self.pos["top"]),
+            (guesses[0], self.answer_size, *self.pos["a1"]),
+            (guesses[1], self.answer_size, *self.pos["a2"]),
+            (guesses[2], self.answer_size, *self.pos["a3"]),
+            (guesses[3], self.answer_size, *self.pos["a4"]),
+        ]
+        ffmpeg_text_args = []
+        for args in slide_args:
+            ffmpeg_text_args.append(self.create_text_arg(*args))
+        self.apply_ffmpeg_args(ffmpeg_text_args)
 
     def create_text_arg(self, text, font_size, x, y):
         """returns ffmpeg args which add the given text at the coordinates"""
@@ -125,14 +90,7 @@ class Slide:
             ["y", y],
         ] + self.text_box_args()
 
-        ffmpeg_args = (
-            self.drawtext_filter_maker(filter_args),
-            "-codec:a",
-            "copy",
-            "slides/" + self.name + ".mp4",
-        )
-
-        return ffmpeg_args
+        return self.drawtext_filter_maker(filter_args)
 
     def drawtext_filter_maker(self, args: list):
         filter_args_str = "drawtext="
@@ -141,11 +99,33 @@ class Slide:
         print(filter_args_str)
         return filter_args_str
 
+    def apply_ffmpeg_args(self, ffmpeg_args):
+        for slide_index, arg in enumerate(ffmpeg_args):
+            if slide_index == 0:
+                self.ffmpeg(
+                    ("-i", self.background, "-vf", arg, "img/" + self.name + ".jpg")
+                )
+            else:
+                self.ffmpeg(
+                    (
+                        "-i",
+                        "temp/" + self.name + ".jpg",
+                        "-vf",
+                        arg,
+                        "img/" + self.name + ".jpg",
+                    )
+                )
+
+            subprocess.run(
+                ["mv", "img/" + self.name + ".jpg", "temp/" + self.name + ".jpg"]
+            )
+
+        subprocess.run(
+            ["mv", "temp/" + self.name + ".jpg", "slides/" + self.name + ".jpg"]
+        )
+
     def delete(self):
-        subprocess.run(["rm", "slides/" + self.name + ".mp4"])
+        subprocess.run(["rm", "slides/" + self.name + ".jpg"])
 
-
-def ffmpeg(args):
-    # if type(args) is str:
-    # subprocess.run(["ffmpeg", ])
-    subprocess.run(["ffmpeg", *args])
+    def ffmpeg(self, args):
+        subprocess.run(["ffmpeg", "-y", *args])

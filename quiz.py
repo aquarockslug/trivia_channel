@@ -1,5 +1,7 @@
 import json
+import random
 import re
+
 import requests
 
 
@@ -59,14 +61,42 @@ class Quiz:
         ).json()["results"]
         return self.questions
 
-    def clean_text(self):
-        CLEANR = re.compile('<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});')
-        for text in self.questions:
-            print(text)
-            text = re.sub(CLEANR, '', text["question"])
+    def add_questions(self, questions):
+        self.questions: dict = questions
 
     def get_questions(self) -> dict:
         return self.questions
+
+    def get_guesses(self) -> list:
+        """[[g1, g2, g3, g4], [g1, g2, g3, g4]]"""
+        guesses = []
+        for question in self.get_questions():
+            curr_guesses = []
+            curr_guesses.append(question["correct_answer"])
+            for guess in question["incorrect_answers"]:
+                curr_guesses.append(guess)
+            guesses.append(curr_guesses)
+        print(guesses)
+        return guesses
+
+    def get_answers(self) -> list:
+        """[a1, a2, a3]"""
+        answers = []
+        for question in self.get_questions():
+            answers.append(question["correct_answer"])
+        return answers
+
+    def get_prompts(self) -> list:
+        prompts = []
+        for question in self.get_questions():
+            prompts.append(question["question"])
+        return prompts
+
+    def clean_text(self):
+        CLEANR = re.compile("<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});")
+        for text in self.questions:
+            print(text)
+            text = re.sub(CLEANR, "", text["question"])
 
     def get_name(self) -> str:
         return self.name
@@ -75,5 +105,6 @@ class Quiz:
         with open("quizzes/" + self.name + ".json", "w") as f:
             f.write(json.dumps(vars(self)))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Quiz_Creator.prompt_create_quiz()
