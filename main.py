@@ -73,7 +73,7 @@ def add_question_slides(questions):
     for prompt, guesses, answer in questions:
         quiz_index += 2
         # create question slide
-        question_slide = Slide(chr(ord("`") + quiz_index) + "_a", "img/cubes.jpg")
+        question_slide = Slide(chr(ord("`") + quiz_index + 1) + "_a", "img/cubes.jpg")
         if len(guesses) <= 3:  # skip boolean questions
             question_slide.delete()
             continue
@@ -81,7 +81,7 @@ def add_question_slides(questions):
         question_slides.append(question_slide)
 
         # create answer slide
-        answer_slide = Slide(chr(ord("`") + quiz_index) + "_b", "img/cubes.jpg")
+        answer_slide = Slide(chr(ord("`") + quiz_index + 1) + "_b", "img/cubes.jpg")
         answer_slide.add_answer(answer)
         answer_slides.append(answer_slide)
 
