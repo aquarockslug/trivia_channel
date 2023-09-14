@@ -59,7 +59,7 @@ def main():
 
 
 def create_videos():
-    subprocess.run(["./make_videos.sh"])
+    subprocess.run(["./make_video.sh"])
 
 
 def clean_slides(slides):
@@ -69,17 +69,19 @@ def clean_slides(slides):
 
 def add_question_slides(questions):
     question_slides, answer_slides = [], []
-    for index, (prompt, guesses, answer) in enumerate(questions):
+    quiz_index = -1
+    for prompt, guesses, answer in questions:
+        quiz_index += 2
         # create question slide
-        question_slide = Slide("g" + str(index + 1), "img/cubes.jpg")
-        if len(guesses) <= 3:
+        question_slide = Slide(chr(ord("`") + quiz_index) + "_a", "img/cubes.jpg")
+        if len(guesses) <= 3:  # skip boolean questions
             question_slide.delete()
             continue
         question_slide.add_guesses(prompt, guesses)
         question_slides.append(question_slide)
 
         # create answer slide
-        answer_slide = Slide("a" + str(index + 2), "img/cubes.jpg")
+        answer_slide = Slide(chr(ord("`") + quiz_index) + "_b", "img/cubes.jpg")
         answer_slide.add_answer(answer)
         answer_slides.append(answer_slide)
 
