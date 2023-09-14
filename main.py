@@ -63,10 +63,8 @@ def create_videos():
 
 def add_question_slides(questions):
     question_slides, answer_slides = [], []
-    quiz_index = -1
-    for prompt, guesses, answer in questions:
-        quiz_index += 2
-        question_name = chr(ord("`") + quiz_index + 1)  # int -> char
+    for index, (prompt, guesses, answer) in enumerate(questions):
+        question_name = chr(ord("`") + index + 1)  # int -> char
 
         # create question slide
         question_slide = Slide(question_name + "_a", "img/cubes.jpg")
