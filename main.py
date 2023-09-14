@@ -55,17 +55,11 @@ def main():
 
     # TODO:
     slide_status(question_slides)
-    # create_videos()
-
-    print(
-        "for f in slides/g*.jpg; do ffmpeg -loop 1 -f image2 -i $f -t 10 $f.mp4; done;"
-    )
+    create_videos()
 
 
-# for f in g*.jpg; do ffmpeg -loop 1 -f image2 -i $f -t 1 $f.mp4; done;
 def create_videos():
-    ffmpeg_arg = "-loop 1 -f image2 -i $f -t 10 $f.mp4; done;".split(" ")
-    subprocess.run(["ffmpeg"] + ffmpeg_arg)
+    subprocess.run(["./make_videos.sh"])
 
 
 def clean_slides(slides):
@@ -85,7 +79,7 @@ def add_question_slides(questions):
         question_slides.append(question_slide)
 
         # create answer slide
-        answer_slide = Slide("a" + str(index + 1), "img/cubes.jpg")
+        answer_slide = Slide("a" + str(index + 2), "img/cubes.jpg")
         answer_slide.add_answer(answer)
         answer_slides.append(answer_slide)
 
