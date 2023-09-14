@@ -6,8 +6,11 @@ from pprint import pprint
 from quiz import Quiz, Quiz_Creator
 from video import Slide
 
-# convert to video:
-# ffmpeg -framerate 1 -i happy%d.jpg -c:v libx264 -r 30 -pix_fmt yuv420p output.mp4
+INCLUDE_TITLE_SLIDE = True
+CREATE_QUESTION_SLIDE = True
+BOOLEAN_QUESTIONS = False
+CREATE_NEW_QUIZ = True
+DEBUG = False
 
 
 def main():
@@ -16,9 +19,6 @@ def main():
 
     # CONFIG ##############################################
     create_new_quiz = True if input("Create new quiz? (y/n):") == "y" else False
-    include_title_slide = True
-    create_question_slides = True
-    debug = False
 
     # QUIZ ################################################
     if create_new_quiz:
@@ -28,7 +28,7 @@ def main():
 
     # quizzes = Quiz_Creator.create_quizzes(amount=2, length=3)
 
-    if debug:
+    if DEBUG:
         pprint(new_quiz)
 
     # IMAGE ###############################################
@@ -37,7 +37,7 @@ def main():
     # VIDEO ###############################################
 
     # create title slide
-    if include_title_slide:
+    if INCLUDE_TITLE_SLIDE:
         Slide("title", "img/cubes.jpg").add_title(new_quiz.name)
 
     # create question slides: (question_slide, answer_slide)
@@ -47,14 +47,13 @@ def main():
         new_quiz.get_answers(),
     )
     question_slides = (
-        add_question_slides(quiz_questions) if create_question_slides else ""
+        add_question_slides(quiz_questions) if CREATE_QUESTION_SLIDE else ""
     )
     if not question_slides:
         print("No questions found")
         return
 
-    # TODO:
-    slide_status(question_slides)
+    clean_slides(question_slides)
     create_videos()
 
 
@@ -62,33 +61,30 @@ def create_videos():
     subprocess.run(["./make_video.sh"])
 
 
-def clean_slides(slides):
-    # for slide in slides:
-    pass
-
-
 def add_question_slides(questions):
     question_slides, answer_slides = [], []
     quiz_index = -1
     for prompt, guesses, answer in questions:
         quiz_index += 2
+        question_name = chr(ord("`") + quiz_index + 1)  # int -> char
+
         # create question slide
-        question_slide = Slide(chr(ord("`") + quiz_index + 1) + "_a", "img/cubes.jpg")
-        if len(guesses) <= 3:  # skip boolean questions
+        question_slide = Slide(question_name + "_a", "img/cubes.jpg")
+        if not BOOLEAN_QUESTIONS and len(guesses) <= 3:
             question_slide.delete()
             continue
         question_slide.add_guesses(prompt, guesses)
         question_slides.append(question_slide)
 
         # create answer slide
-        answer_slide = Slide(chr(ord("`") + quiz_index + 1) + "_b", "img/cubes.jpg")
+        answer_slide = Slide(question_name + "_b", "img/cubes.jpg")
         answer_slide.add_answer(answer)
         answer_slides.append(answer_slide)
 
     return list(zip(question_slides, answer_slides))
 
 
-def slide_status(slides):
+def clean_slides(slides):
     """remove empty slides and print status"""
     print("\n", str(len(slides)), "questions created: \n")
     for q_slide, a_slide in slides:
@@ -112,11 +108,6 @@ def open_quiz(name) -> Quiz:
     quiz = Quiz(quiz_d["name"], quiz_d["length"], quiz_d["category"])
     quiz.add_questions(quiz_d["questions"])
     return quiz
-
-
-def open_video(path):
-    """OPEN WITH VLC"""
-    subprocess.run(["vlc", path + ".mp4"])
 
 
 def scale_img(input_path, output_path):
