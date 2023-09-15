@@ -22,9 +22,11 @@ def main():
     if DEBUG:
         pprint(quiz_data)
 
-    background = convert_to_png(scale_img("img/leopard.jpg"))
+    background = convert_to_png(
+        scale_img("img/" + input("Select background: ") + ".jpg")
+    )
 
-    if input("Create title slide?(y/n): ") == "y":
+    if input("\nCreate title slide?(y/n): ") == "y":
         Slide("title", background).add_title(new_quiz.name)
 
     question_slides = add_question_slides(quiz_data, background)
@@ -36,7 +38,9 @@ def get_quiz():
     new_quiz = (
         Quiz_Creator.prompt_create_quiz()
         if input("Create new quiz? (y/n): ") == "y"
-        else open_quiz_from_json(input("Select quiz to open: "))
+        else open_quiz_from_json(
+            input(list_saved_quizzes() + "\n" + "Select quiz to open: ")
+        )
     )
     return new_quiz
 
@@ -85,7 +89,6 @@ def create_video(title):
 
 def open_quiz_from_json(name) -> Quiz:
     """create Quiz object from a json file in the quizzes directory"""
-    print_quizzes()
     quiz_d = {}
     with open("quizzes/" + name + ".json", "r", encoding="UTF") as file:
         quiz_d = json.loads(file.read())
@@ -94,11 +97,17 @@ def open_quiz_from_json(name) -> Quiz:
     return quiz
 
 
-def print_quizzes():
-    for _, _, filenames in os.walk("quizzes/"):
-        print("Quizzes:")
+def list_saved_quizzes() -> str:
+    names: str = ""
+    print("\nQuizzes:")
+    for index, (_, _, filenames) in enumerate(os.walk("quizzes/")):
         for filename in filenames:
-            print(filename)
+            names += str(index + 1) + ". " + filename.split(".")[0] + "\n"
+    return names
+
+
+def list_saved_images() -> str:
+    return ""
 
 
 def scale_img(input_path):
