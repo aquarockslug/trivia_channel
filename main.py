@@ -6,7 +6,7 @@ from pprint import pprint
 from quiz import Quiz, Quiz_Creator
 from video import Slide
 
-INCLUDE_TITLE_SLIDE = True
+INCLUDE_TITLE_SLIDE = False
 CREATE_QUESTION_SLIDE = True
 BOOLEAN_QUESTIONS = False
 CREATE_NEW_QUIZ = True
@@ -32,7 +32,7 @@ def main():
         pprint(new_quiz)
 
     # IMAGE ###############################################
-    scale_img("img/cubes_small.jpg", "img/cubes.jpg")
+    scale_img("img/leopard.jpg", "img/cubes.jpg")
 
     # VIDEO ###############################################
 
@@ -64,7 +64,7 @@ def create_videos():
 def add_question_slides(questions):
     question_slides, answer_slides = [], []
     for index, (prompt, guesses, answer) in enumerate(questions):
-        question_name = chr(ord("`") + index + 1)  # int -> char
+        question_name = chr(ord("`") + index + 2)  # int -> char
 
         # create question slide
         question_slide = Slide(question_name + "_a", "img/cubes.jpg")
