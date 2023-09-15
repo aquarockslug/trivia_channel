@@ -1,73 +1,53 @@
 import json
 import os
 import subprocess
+import sys
 from pprint import pprint
 
 from quiz import Quiz, Quiz_Creator
 from video import Slide
 
-INCLUDE_TITLE_SLIDE = False
-CREATE_QUESTION_SLIDE = True
+AUDIO_FILE = "../audio/break1.mp3"
 BOOLEAN_QUESTIONS = False
 CREATE_NEW_QUIZ = True
 DEBUG = False
 
 
 def main():
-    """creates quizzes and slides, then adds the questions and answers
-    for the quiz to each slide"""
+    """creates a quiz video"""
 
-    # CONFIG ##############################################
-    create_new_quiz = True if input("Create new quiz? (y/n):") == "y" else False
-
-    # QUIZ ################################################
-    if create_new_quiz:
-        new_quiz: Quiz = Quiz_Creator.prompt_create_quiz()
-    else:
-        new_quiz: Quiz = open_quiz(input("Select quiz to open: "))
-
-    # quizzes = Quiz_Creator.create_quizzes(amount=2, length=3)
+    new_quiz = get_quiz()
+    quiz_data = new_quiz.get_slide_data()
 
     if DEBUG:
-        pprint(new_quiz)
+        pprint(quiz_data)
 
-    # IMAGE ###############################################
-    scale_img("img/leopard.jpg", "img/cubes.jpg")
+    background = convert_to_png(scale_img("img/leopard.jpg"))
 
-    # VIDEO ###############################################
+    if input("Create title slide?(y/n): ") == "y":
+        Slide("title", background).add_title(new_quiz.name)
 
-    # create title slide
-    if INCLUDE_TITLE_SLIDE:
-        Slide("title", "img/cubes.jpg").add_title(new_quiz.name)
-
-    # create question slides: (question_slide, answer_slide)
-    quiz_questions = zip(
-        new_quiz.get_prompts(),
-        new_quiz.get_guesses(),
-        new_quiz.get_answers(),
-    )
-    question_slides = (
-        add_question_slides(quiz_questions) if CREATE_QUESTION_SLIDE else ""
-    )
-    if not question_slides:
-        print("No questions found")
-        return
-
+    question_slides = add_question_slides(quiz_data, background)
     clean_slides(question_slides)
-    create_videos()
+    create_video(new_quiz.name)
 
 
-def create_videos():
-    subprocess.run(["./make_video.sh"])
+def get_quiz():
+    new_quiz = (
+        Quiz_Creator.prompt_create_quiz()
+        if input("Create new quiz? (y/n): ") == "y"
+        else open_quiz_from_json(input("Select quiz to open: "))
+    )
+    return new_quiz
 
 
-def add_question_slides(questions):
+def add_question_slides(questions, background):
     question_slides, answer_slides = [], []
     for index, (prompt, guesses, answer) in enumerate(questions):
         question_name = chr(ord("`") + index + 2)  # int -> char
 
         # create question slide
-        question_slide = Slide(question_name + "_a", "img/cubes.jpg")
+        question_slide = Slide(question_name + "_a", background)
         if not BOOLEAN_QUESTIONS and len(guesses) <= 3:
             question_slide.delete()
             continue
@@ -75,7 +55,7 @@ def add_question_slides(questions):
         question_slides.append(question_slide)
 
         # create answer slide
-        answer_slide = Slide(question_name + "_b", "img/cubes.jpg")
+        answer_slide = Slide(question_name + "_b", background)
         answer_slide.add_answer(answer)
         answer_slides.append(answer_slide)
 
@@ -88,8 +68,8 @@ def clean_slides(slides):
     for q_slide, a_slide in slides:
         if os.path.isfile(q_slide.path) and os.path.isfile(a_slide.path):
             if (
-                os.path.getsize("slides/" + q_slide.name + ".jpg") > 0
-                and os.path.getsize("slides/" + a_slide.name + ".jpg") > 0
+                os.path.getsize("slides/" + q_slide.name + ".png") > 0
+                and os.path.getsize("slides/" + a_slide.name + ".png") > 0
             ):
                 print(q_slide.name + " and " + a_slide.name)
                 continue
@@ -98,8 +78,14 @@ def clean_slides(slides):
         a_slide.delete()
 
 
-def open_quiz(name) -> Quiz:
-    """OPEN QUIZ from json"""
+def create_video(title):
+    """execute make_video.sh"""
+    subprocess.run(["./make_video.sh", title, AUDIO_FILE])
+
+
+def open_quiz_from_json(name) -> Quiz:
+    """create Quiz object from a json file in the quizzes directory"""
+    print_quizzes()
     quiz_d = {}
     with open("quizzes/" + name + ".json", "r", encoding="UTF") as file:
         quiz_d = json.loads(file.read())
@@ -108,9 +94,31 @@ def open_quiz(name) -> Quiz:
     return quiz
 
 
-def scale_img(input_path, output_path):
-    subprocess.run(["ffmpeg", "-i", input_path, "-vf", "scale=1920:1080", output_path])
+def print_quizzes():
+    for _, _, filenames in os.walk("quizzes/"):
+        print("Quizzes:")
+        for filename in filenames:
+            print(filename)
+
+
+def scale_img(input_path):
+    output_path = input_path.split(".")[:-1][0] + "_1080.jpg"
+    subprocess.run(
+        ["ffmpeg", "-i", input_path, "-vf", "scale=1920:1080", "-y", output_path]
+    )
+    return output_path
+
+
+def convert_to_png(input_path):
+    file = input_path.split(".")[:-1][0] + ".png"
+    subprocess.run(["ffmpeg", "-i", input_path, "-y", file])
+    return file
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) == 3:  # main.py name background
+        Slide("title", sys.argv[2]).add_title(sys.argv[1])
+        args = "ffmpeg -y -loop 1 -i slides/title.png -f lavfi -i anullsrc=channel_layout=5.1:sample_rate=48000 -t 3 -c:v libx264 -t 3 -pix_fmt yuv420p -vf scale=1920:1080 -y output/title.mpeg"
+        subprocess.run(args.split(" "))
+    else:
+        main()

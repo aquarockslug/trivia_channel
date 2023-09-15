@@ -7,10 +7,10 @@ class Slide:
     def __init__(
         self,
         name="cube",
-        background="img/cube.jpg",
+        background="img/cube.png",
     ):
         self.name = name
-        self.path = "slides/" + name + ".jpg"
+        self.path = "slides/" + name + ".png"
         self.background = background
 
         self.question_size = 64
@@ -50,7 +50,7 @@ class Slide:
                 self.background,
                 "-vf",
                 self.create_text_arg(title, 196, *self.pos["center"]),
-                "slides/" + self.name + ".jpg",
+                "slides/" + self.name + ".png",
             )
         )
 
@@ -61,7 +61,7 @@ class Slide:
                 self.background,
                 "-vf",
                 self.create_text_arg(answer, 144, *self.pos["center"]),
-                "slides/" + self.name + ".jpg",
+                "slides/" + self.name + ".png",
             )
         )
 
@@ -103,29 +103,29 @@ class Slide:
         for slide_index, arg in enumerate(ffmpeg_args):
             if slide_index == 0:
                 self.ffmpeg(
-                    ("-i", self.background, "-vf", arg, "img/" + self.name + ".jpg")
+                    ("-i", self.background, "-vf", arg, "img/" + self.name + ".png")
                 )
             else:
                 self.ffmpeg(
                     (
                         "-i",
-                        "temp/" + self.name + ".jpg",
+                        "temp/" + self.name + ".png",
                         "-vf",
                         arg,
-                        "img/" + self.name + ".jpg",
+                        "img/" + self.name + ".png",
                     )
                 )
 
             subprocess.run(
-                ["mv", "img/" + self.name + ".jpg", "temp/" + self.name + ".jpg"]
+                ["mv", "img/" + self.name + ".png", "temp/" + self.name + ".png"]
             )
 
         subprocess.run(
-            ["mv", "temp/" + self.name + ".jpg", "slides/" + self.name + ".jpg"]
+            ["mv", "temp/" + self.name + ".png", "slides/" + self.name + ".png"]
         )
 
     def delete(self):
-        subprocess.run(["rm", "slides/" + self.name + ".jpg"])
+        subprocess.run(["rm", "slides/" + self.name + ".png"])
 
     def ffmpeg(self, args):
         subprocess.run(["ffmpeg", "-y", *args])

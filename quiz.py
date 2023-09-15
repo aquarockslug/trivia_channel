@@ -67,6 +67,15 @@ class Quiz:
     def get_questions(self) -> dict:
         return self.questions
 
+    def get_slide_data(self):
+        return zip(self.get_prompts(), self.get_guesses(), self.get_answers())
+
+    def get_prompts(self) -> list:
+        prompts = []
+        for question in self.get_questions():
+            prompts.append(question["question"])
+        return prompts
+
     def get_guesses(self) -> list:
         """[[g1, g2, g3, g4], [g1, g2, g3, g4]]"""
         guesses = []
@@ -85,12 +94,6 @@ class Quiz:
         for question in self.get_questions():
             answers.append(question["correct_answer"])
         return answers
-
-    def get_prompts(self) -> list:
-        prompts = []
-        for question in self.get_questions():
-            prompts.append(question["question"])
-        return prompts
 
     def clean_text(self):
         CLEANR = re.compile("<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});")
