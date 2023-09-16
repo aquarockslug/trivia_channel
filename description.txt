@@ -1,0 +1,4 @@
+Questions from https://opentdb.com/
+
+Created using Python and FFmpeg
+https://github.com/Lavakz/trivia_channel
