@@ -1,5 +1,7 @@
 import subprocess
 
+DEBUG = True
+
 
 class Slide:
     """segment of video"""
@@ -68,13 +70,15 @@ class Slide:
     def add_guesses(self, prompt, guesses):
         if len(prompt) >= 40:
             prompt = self.add_linebreak(prompt)
-        slide_args = [
-            (prompt, self.question_size, *self.pos["top"]),
-            (guesses[0], self.answer_size, *self.pos["a1"]),
-            (guesses[1], self.answer_size, *self.pos["a2"]),
-            (guesses[2], self.answer_size, *self.pos["a3"]),
-            (guesses[3], self.answer_size, *self.pos["a4"]),
-        ]
+
+        slide_args = [(prompt, self.question_size, *self.pos["top"])]
+        for i in range(0, 3): slide_args.append(
+            (
+                guesses[i], 
+                self.answer_size, 
+                *self.pos["a" + str(i + 1)])
+            )
+
         ffmpeg_text_args = []
         for args in slide_args:
             ffmpeg_text_args.append(self.create_text_arg(*args))
@@ -89,43 +93,42 @@ class Slide:
             ["x", x],
             ["y", y],
         ] + self.text_box_args()
-
         return self.drawtext_filter_maker(filter_args)
 
     def drawtext_filter_maker(self, args: list):
         filter_args_str = "drawtext="
         for arg in args:
             filter_args_str += arg[0] + "=" + arg[1] + ":"
-        print(filter_args_str)
+        if DEBUG: print(filter_args_str)
         return filter_args_str
 
     def apply_ffmpeg_args(self, ffmpeg_args):
+        temp_name = "temp/" + self.name +".png"
+        img_name = "img/" + self.name +".png"
         for slide_index, arg in enumerate(ffmpeg_args):
             if slide_index == 0:
                 self.ffmpeg(
-                    ("-i", self.background, "-vf", arg, "img/" + self.name + ".png")
+                    ("-i", self.background, "-vf", arg, img_name)
                 )
             else:
-                self.ffmpeg(
-                    (
-                        "-i",
-                        "temp/" + self.name + ".png",
-                        "-vf",
-                        arg,
-                        "img/" + self.name + ".png",
-                    )
-                )
+                self.ffmpeg((
+                        "-i", temp_name,
+                        "-vf", arg,
+                        img_name,
+                ))
 
-            subprocess.run(
-                ["mv", "img/" + self.name + ".png", "temp/" + self.name + ".png"]
-            )
+            subprocess.run(["mv", img_name, temp_name])
 
-        subprocess.run(
-            ["mv", "temp/" + self.name + ".png", "slides/" + self.name + ".png"]
-        )
+        subprocess.run(["mv", temp_name, "slides/" + self.name + ".png"])
 
     def delete(self):
         subprocess.run(["rm", "slides/" + self.name + ".png"])
 
     def ffmpeg(self, args):
-        subprocess.run(["ffmpeg", "-y", *args])
+        if not DEBUG:
+            subprocess.run(
+                "ffmpeg -y -loglevel quiet -stats".split(" ")
+                + [*args]
+            )
+        else:
+            subprocess.run(["ffmpeg", "-y", *args])

@@ -4,7 +4,7 @@ import subprocess
 import sys
 from pprint import pprint
 
-from quiz import Quiz, Quiz_Creator
+from quiz import Quiz, QuizCreator
 from video import Slide
 
 AUDIO_FILE = "../audio/break1.mp3"
@@ -36,7 +36,7 @@ def main():
 
 def get_quiz():
     new_quiz = (
-        Quiz_Creator.prompt_create_quiz()
+        QuizCreator.prompt_create_quiz()
         if input("Create new quiz? (y/n): ") == "y"
         else open_quiz_from_json(
             input(list_saved_quizzes() + "\n" + "Select quiz to open: ")
@@ -98,6 +98,7 @@ def open_quiz_from_json(name) -> Quiz:
 
 
 def list_saved_quizzes() -> str:
+    """  returns list a of quizzes as a string """
     names: str = ""
     print("\nQuizzes:")
     for index, (_, _, filenames) in enumerate(os.walk("quizzes/")):

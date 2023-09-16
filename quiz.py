@@ -1,20 +1,22 @@
 import json
-import random
 import re
 
 import requests
 
 
-class Quiz_Creator:
+class QuizCreator:
     """quiz factory"""
 
     @staticmethod
     def prompt_create_quiz():
-        Quiz_Creator.list_categories()
+        QuizCreator.list_categories()
         print("---------------------------")
-        return Quiz_Creator.create_quiz(
+        DEFAULT_LENGTH = 20
+        USE_DEFAULT = True
+        return QuizCreator.create_quiz(
             input("Enter quiz name: "),
-            int(input("Enter quiz length: ")),
+            DEFAULT_LENGTH if USE_DEFAULT else int(
+                input("Enter quiz length: ")),
             int(input("Enter category number: ")),
         )
 
@@ -31,7 +33,8 @@ class Quiz_Creator:
         quizzes = []
         for i in range(0, amount):
             quizzes.append(
-                Quiz_Creator.create_quiz(name + "_" + str(i + 1), length, category)
+                QuizCreator.create_quiz(
+                    name + "_" + str(i + 1), length, category)
             )
         return quizzes
 
@@ -110,4 +113,4 @@ class Quiz:
 
 
 if __name__ == "__main__":
-    Quiz_Creator.prompt_create_quiz()
+    QuizCreator.prompt_create_quiz()
