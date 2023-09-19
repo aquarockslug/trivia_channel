@@ -22,6 +22,7 @@ def main():
     if DEBUG:
         pprint(quiz_data)
 
+    print(list_saved_images())
     background = convert_to_png(
         scale_img("img/" + input("Select background: ") + ".jpg")
     )
@@ -98,16 +99,20 @@ def open_quiz_from_json(name) -> Quiz:
 
 
 def list_saved_quizzes() -> str:
-    names: str = ""
-    print("\nQuizzes:")
-    for index, (_, _, filenames) in enumerate(os.walk("quizzes/")):
-        for filename in filenames:
-            names += str(index + 1) + ". " + filename.split(".")[0] + "\n"
-    return names
+    return list_files("quizzes/")
 
 
 def list_saved_images() -> str:
-    return ""
+    return list_files("img/")
+
+
+def list_files(path):
+    files: str = ""
+    print("\nQuizzes:")
+    for _, _, filenames in os.walk(path):
+        for index, filename in enumerate(filenames):
+            files += str(index + 1) + ". " + filename.split(".")[0] + "\n"
+    return files
 
 
 def scale_img(input_path):
