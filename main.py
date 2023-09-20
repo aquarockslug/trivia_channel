@@ -71,7 +71,7 @@ def add_question_slides(questions, background):
 
 def clean_slides(slides):
     """remove empty slides and print status"""
-    print("\n", str(len(slides)), "questions created: \n")
+    print("\n", str(len(slides) / 2), "questions created: \n")
     for q_slide, a_slide in slides:
         if os.path.isfile(q_slide.path) and os.path.isfile(a_slide.path):
             if (
@@ -113,7 +113,7 @@ def list_files(path, title):
     print("\n%s:" % title)
     for _, _, filenames in os.walk(path):
         for index, filename in enumerate(filenames):
-            files += str(index + 1) + ". " + filename.split(".")[0] + "\n"
+            files += str(index + 1) + " - " + filename.split(".")[0] + "\n"
     return files
 
 

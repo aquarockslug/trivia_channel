@@ -11,7 +11,7 @@ class QuizCreator:
     def prompt_create_quiz():
         QuizCreator.list_categories()
         print("---------------------------")
-        DEFAULT_LENGTH = 20
+        DEFAULT_LENGTH = 23
         USE_DEFAULT = True
         return QuizCreator.create_quiz(
             input("Enter quiz name: "),
