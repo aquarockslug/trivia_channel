@@ -99,17 +99,7 @@ def open_quiz_from_json(name) -> Quiz:
 
 
 def list_saved_quizzes() -> str:
-<<<<<<< HEAD
     return list_files("quizzes/")
-=======
-    """  returns list a of quizzes as a string """
-    names: str = ""
-    print("\nQuizzes:")
-    for index, (_, _, filenames) in enumerate(os.walk("quizzes/")):
-        for filename in filenames:
-            names += str(index + 1) + ". " + filename.split(".")[0] + "\n"
-    return names
->>>>>>> 105e731a3a89d264ba2a3997b7016c6298701b0c
 
 
 def list_saved_images() -> str:

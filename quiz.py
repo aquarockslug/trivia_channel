@@ -15,8 +15,7 @@ class QuizCreator:
         USE_DEFAULT = True
         return QuizCreator.create_quiz(
             input("Enter quiz name: "),
-            DEFAULT_LENGTH if USE_DEFAULT else int(
-                input("Enter quiz length: ")),
+            DEFAULT_LENGTH if USE_DEFAULT else int(input("Enter quiz length: ")),
             int(input("Enter category number: ")),
         )
 
@@ -33,8 +32,7 @@ class QuizCreator:
         quizzes = []
         for i in range(0, amount):
             quizzes.append(
-                QuizCreator.create_quiz(
-                    name + "_" + str(i + 1), length, category)
+                QuizCreator.create_quiz(name + "_" + str(i + 1), length, category)
             )
         return quizzes
 
@@ -80,7 +78,6 @@ class Quiz:
         return prompts
 
     def get_guesses(self) -> list:
-        """[[g1, g2, g3, g4], [g1, g2, g3, g4]]"""
         guesses = []
         for question in self.get_questions():
             curr_guesses = []
@@ -92,17 +89,16 @@ class Quiz:
         return guesses
 
     def get_answers(self) -> list:
-        """[a1, a2, a3]"""
         answers = []
         for question in self.get_questions():
             answers.append(question["correct_answer"])
         return answers
 
     def clean_text(self):
-        CLEANR = re.compile("<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});")
+        CLEANER = re.compile("<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});'")
         for text in self.questions:
             print(text)
-            text = re.sub(CLEANR, "", text["question"])
+            text = re.sub(CLEANER, "", text["question"])
 
     def get_name(self) -> str:
         return self.name

@@ -20,8 +20,13 @@ class Slide:
         self.path = "slides/" + name + ".png"
         self.background = background
 
-        self.question_size = 64
-        self.answer_size = 48
+        self.title_size = 212
+        self.question_size = 72
+        self.guess_size = 48
+        self.answer_size = 128
+
+        self.guesses_font = "iosevka_curly"
+
         self.pos = {
             "center": ("(w-text_w)/2", "(h-text_h)/2"),
             "top": ("(w-text_w)/2", "(h-text_h)/4"),
@@ -51,23 +56,18 @@ class Slide:
         return text[:linebreak] + "\n" + text[linebreak:]
 
     def add_title(self, title: str):
-        self.ffmpeg(
-            (
-                "-i",
-                self.background,
-                "-vf",
-                self.create_text_arg(title, "coolvetica", 196, *self.pos["center"]),
-                "slides/" + self.name + ".png",
-            )
-        )
+        self.center_text(title, "coolvetica", self.title_size)
 
     def add_answer(self, answer):
+        self.center_text(answer, "coolvetica", self.answer_size)
+
+    def center_text(self, text: str, font_name: str, size: int):
         self.ffmpeg(
             (
                 "-i",
                 self.background,
                 "-vf",
-                self.create_text_arg(answer, "coolvetica", 144, *self.pos["center"]),
+                self.create_text_arg(text, font_name, size, *self.pos["center"]),
                 "slides/" + self.name + ".png",
             )
         )
@@ -76,12 +76,17 @@ class Slide:
         if len(prompt) >= 40:
             prompt = self.add_linebreak(prompt)
         slide_args = [
-            (prompt, self.question_size, *self.pos["top"]),
-            (guesses[0], self.answer_size, *self.pos["a1"]),
-            (guesses[1], self.answer_size, *self.pos["a2"]),
-            (guesses[2], self.answer_size, *self.pos["a3"]),
-            (guesses[3], self.answer_size, *self.pos["a4"]),
+            (prompt, str("coolvetica"), self.question_size, *self.pos["top"]),
         ]
+        for guess_index in range(0, 3):
+            slide_args.append(
+                (
+                    guesses[guess_index],
+                    str(self.guesses_font),
+                    self.question_size,
+                    *self.pos["a" + str(guess_index + 1)],
+                )
+            )
         ffmpeg_text_args = []
         for args in slide_args:
             ffmpeg_text_args.append(self.create_text_arg(*args))
@@ -135,4 +140,4 @@ class Slide:
         subprocess.run(["rm", "slides/" + self.name + ".png"])
 
     def ffmpeg(self, args):
-        subprocess.run(["ffmpeg", "-y", *args])
+        subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", *args])
