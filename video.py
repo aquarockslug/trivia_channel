@@ -1,5 +1,12 @@
 import subprocess
 
+FONTS = {
+    "coolvetica": "fonts/coolvetica.ttf",
+    "opensans": "fonts/OpenSans-BoldItalic.ttf",
+    "iosevka_curly": "fonts/iosevka-curly-semibold.ttc",
+    "iosevka_semi": "iosevka-semiboldoblique.ttf",
+}
+
 
 class Slide:
     """segment of video"""
@@ -49,7 +56,7 @@ class Slide:
                 "-i",
                 self.background,
                 "-vf",
-                self.create_text_arg(title, 196, *self.pos["center"]),
+                self.create_text_arg(title, "coolvetica", 196, *self.pos["center"]),
                 "slides/" + self.name + ".png",
             )
         )
@@ -60,7 +67,7 @@ class Slide:
                 "-i",
                 self.background,
                 "-vf",
-                self.create_text_arg(answer, 144, *self.pos["center"]),
+                self.create_text_arg(answer, "coolvetica", 144, *self.pos["center"]),
                 "slides/" + self.name + ".png",
             )
         )
@@ -80,10 +87,10 @@ class Slide:
             ffmpeg_text_args.append(self.create_text_arg(*args))
         self.apply_ffmpeg_args(ffmpeg_text_args)
 
-    def create_text_arg(self, text, font_size, x, y):
+    def create_text_arg(self, text, font_name, font_size, x, y):
         """returns ffmpeg args which add the given text at the coordinates"""
         filter_args = [
-            ["fontfile", "OpenSans-BoldItalic.ttf"],
+            ["fontfile", FONTS[font_name]],
             ["text", text],
             ["fontsize", str(font_size)],
             ["x", x],
