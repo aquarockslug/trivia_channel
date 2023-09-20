@@ -29,10 +29,10 @@ class Slide:
 
     def text_box_args(self):
         return [
-            ["fontcolor", "white"],
-            ["box", "1"],
-            ["boxcolor", "black@0.7"],
-            ["boxborderw", "15"],
+            ["fontcolor", "black"],
+            # ["box", "1"],
+            # ["boxcolor", "black@0.7"],
+            # ["boxborderw", "15"],
         ]
 
     def add_linebreak(self, text):
