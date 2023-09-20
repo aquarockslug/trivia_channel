@@ -32,6 +32,7 @@ def main():
 
     question_slides = add_question_slides(quiz_data, background)
     clean_slides(question_slides)
+    print("\nCreating question slides:\n")
     create_video(new_quiz.name)
 
 
@@ -40,9 +41,10 @@ def get_quiz():
         QuizCreator.prompt_create_quiz()
         if input("Create new quiz? (y/n): ") == "y"
         else open_quiz_from_json(
-            input(list_saved_quizzes() + "\n" + "Select quiz to open: ")
+            input(list_saved_quizzes() + "\nSelect quiz to open: ")
         )
     )
+    print("")
     return new_quiz
 
 
@@ -99,16 +101,16 @@ def open_quiz_from_json(name) -> Quiz:
 
 
 def list_saved_quizzes() -> str:
-    return list_files("quizzes/")
+    return list_files("quizzes/", "Quizzes")
 
 
 def list_saved_images() -> str:
-    return list_files("img/")
+    return list_files("img/", "Images")
 
 
-def list_files(path):
+def list_files(path, title):
     files: str = ""
-    print("\nQuizzes:")
+    print("\n%s:" % title)
     for _, _, filenames in os.walk(path):
         for index, filename in enumerate(filenames):
             files += str(index + 1) + ". " + filename.split(".")[0] + "\n"

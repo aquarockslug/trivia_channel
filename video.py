@@ -34,6 +34,7 @@ class Slide:
             "a2": ("((w-text_w) - (w-text_w)/4)", "((h-text_h) - (h-text_h)/4)"),
             "a3": ("(w-text_w)/4", "((h-text_h) - (h-text_h)/8)"),
             "a4": ("((w-text_w) - (w-text_w)/4)", "((h-text_h) - (h-text_h)/8)"),
+            "corner": ("0", "0"),
         }
 
     def __str__(self):
