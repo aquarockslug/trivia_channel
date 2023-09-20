@@ -25,7 +25,7 @@ class Slide:
         self.guess_size = 48
         self.answer_size = 128
 
-        self.guesses_font = "iosevka_curly"
+        self.guesses_font = "coolvetica"
 
         self.pos = {
             "center": ("(w-text_w)/2", "(h-text_h)/2"),
@@ -84,7 +84,7 @@ class Slide:
                 (
                     guesses[guess_index],
                     str(self.guesses_font),
-                    self.question_size,
+                    self.guess_size,
                     *self.pos["a" + str(guess_index + 1)],
                 )
             )
@@ -141,4 +141,4 @@ class Slide:
         subprocess.run(["rm", "slides/" + self.name + ".png"])
 
     def ffmpeg(self, args):
-        subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", *args])
+        subprocess.run(["ffmpeg", "-v", "quiet", "-stats", "-y", *args])

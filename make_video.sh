@@ -14,7 +14,7 @@ for f in *b.png; do
 	rm $f
 done
 
-ffmpeg -y -loop 1 -i title.png -f lavfi -i anullsrc=channel_layout=5.1:sample_rate=48000 -t 3 -c:v libx264 -t 3 -pix_fmt yuv420p -vf scale=1920:1080 -y ../combine/a_title.png.mpeg
+ffmpeg -v quiet -stats -y -loop 1 -i title.png -f lavfi -i anullsrc=channel_layout=5.1:sample_rate=48000 -t 3 -c:v libx264 -t 3 -pix_fmt yuv420p -vf scale=1920:1080 -y ../combine/a_title.png.mpeg
 cd ..
 
 cd combine || exit
@@ -23,4 +23,5 @@ cd combine || exit
 CONCAT=""
 for f in *.mpeg; do CONCAT="$CONCAT$f|"; done
 sort "$CONCAT"
-ffmpeg -i "concat:${CONCAT::-1}" -c copy "../output/$1.mp4"
+ffmpeg -v quiet -stats -y -i "concat:${CONCAT::-1}" -c copy "../output/$1.mp4"
+echo "\n$CONCAT\nCreated $1.mp4 in output folder"
