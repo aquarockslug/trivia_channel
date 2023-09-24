@@ -1,0 +1,14 @@
+{
+  "title": "General Trivia",
+  "description": "Created using questions from opentdb.com",
+  "tags": [
+    "trivia",
+    "quiz",
+    "questions"
+  ],
+  "privacyStatus": "private",
+  "madeForKids": false,
+  "embeddable": true,
+  "license": "creativeCommon",
+  "publicStatsViewable": true
+}
