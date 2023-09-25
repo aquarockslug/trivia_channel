@@ -1,2 +1,2 @@
 #!/bin/bash
-python main.py
+xfce4-terminal --command "python main.py"

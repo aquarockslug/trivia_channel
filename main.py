@@ -1,11 +1,13 @@
+import html
 import json
 import os
 import subprocess
-import sys
-from pprint import pprint
 
 from quiz import Quiz, QuizCreator
 from video import Slide
+
+# from youtube_upload.client import YoutubeUploader
+
 
 AUDIO_FILE = "../audio/break1.mp3"
 BOOLEAN_QUESTIONS = False
@@ -14,26 +16,27 @@ DEBUG = False
 
 
 def main():
-    """creates a quiz video"""
+    """Menu"""
 
     new_quiz = get_quiz()
-    quiz_data = new_quiz.get_slide_data()
+    video_from_quiz_data(new_quiz)
 
-    if DEBUG:
-        pprint(quiz_data)
 
-    print(list_saved_images())
-    background = convert_to_png(
-        scale_img("img/" + input("Select background: ") + ".jpg")
-    )
+def video_from_quiz_data(quiz: Quiz):
+    """creates a quiz video"""
+    slide_data = quiz.get_slide_data()
+    background = get_background_image()
 
-    if input("\nCreate title slide?(y/n): ") == "y":
-        Slide("title", background).add_title(new_quiz.name)
+    if input("\nCreate title slide? (y/n): ") == "y":
+        Slide("title", background).add_title(quiz.name)
 
-    question_slides = add_question_slides(quiz_data, background)
+    question_slides = create_question_slides(slide_data, background)
     clean_slides(question_slides)
     print("\nCreating question slides:\n")
-    create_video(new_quiz.name)
+    create_video(quiz.name)
+
+    if input("Upload new video? (y/n): ") == "y":
+        upload(quiz.name)
 
 
 def get_quiz():
@@ -48,10 +51,15 @@ def get_quiz():
     return new_quiz
 
 
-def add_question_slides(questions, background):
+def create_question_slides(questions, background):
     question_slides, answer_slides = [], []
     for index, (prompt, guesses, answer) in enumerate(questions):
         question_name = chr(ord("`") + index + 2)  # int -> char
+
+        prompt = html.unescape(prompt)
+        for guess in guesses:
+            guess = html.unescape(guess)
+        answer = html.unescape(answer)
 
         # create question slide
         question_slide = Slide(question_name + "_a", background)
@@ -101,24 +109,35 @@ def open_quiz_from_json(name) -> Quiz:
 
 
 def list_saved_quizzes() -> str:
-    return list_files("quizzes/", "Quizzes")
+    return list_files("quizzes/", "Quizzes", False)
 
 
 def list_saved_images() -> str:
-    return list_files("img/", "Images")
+    return list_files("img/", "Images", True)
 
 
-def list_files(path, title):
+def list_files(path, title, show_ext):
     files: str = ""
     print("\n%s:" % title)
     for _, _, filenames in os.walk(path):
         for index, filename in enumerate(filenames):
-            files += str(index + 1) + " - " + filename.split(".")[0] + "\n"
+            files += (
+                str(index + 1)
+                + " - "
+                + (filename if show_ext else filename.split(".")[0])
+                + "\n"
+            )
     return files
 
 
+def get_background_image():
+    print(list_saved_images())
+    # return convert_to_png(scale_img("img/" + input("Select background: ") + ".jpg"))
+    return "img/" + input("Select background: ")
+
+
 def scale_img(input_path):
-    output_path = input_path.split(".")[:-1][0] + "_1080.jpg"
+    output_path = input_path.split(".")[0] + "_1080.jpg"
     subprocess.run(
         ["ffmpeg", "-i", input_path, "-vf", "scale=1920:1080", "-y", output_path]
     )
@@ -126,15 +145,14 @@ def scale_img(input_path):
 
 
 def convert_to_png(input_path):
-    file = input_path.split(".")[:-1][0] + ".png"
+    file = input_path.split(".")[0] + ".png"
     subprocess.run(["ffmpeg", "-i", input_path, "-y", file])
     return file
 
 
+def upload(name: str):
+    subprocess.run(["./upload.sh", name])
+
+
 if __name__ == "__main__":
-    if len(sys.argv) == 3:  # main.py name background
-        Slide("title", sys.argv[2]).add_title(sys.argv[1])
-        args = "ffmpeg -y -loop 1 -i slides/title.png -f lavfi -i anullsrc=channel_layout=5.1:sample_rate=48000 -t 3 -c:v libx264 -t 3 -pix_fmt yuv420p -vf scale=1920:1080 -y output/title.mpeg"
-        subprocess.run(args.split(" "))
-    else:
-        main()
+    main()

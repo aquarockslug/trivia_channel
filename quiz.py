@@ -1,6 +1,5 @@
 import json
-import re
-
+import html
 import requests
 
 
@@ -40,7 +39,6 @@ class QuizCreator:
     def create_quiz(name: str, length: int, category: int):
         new_quiz = Quiz(name, length, category)
         new_quiz.request_questions()
-        new_quiz.clean_text()
         new_quiz.save_json_file()
         return new_quiz
 
@@ -74,16 +72,16 @@ class Quiz:
     def get_prompts(self) -> list:
         prompts = []
         for question in self.get_questions():
-            prompts.append(question["question"])
+            prompts.append(html.unescape(question["question"]))
         return prompts
 
     def get_guesses(self) -> list:
         guesses = []
         for question in self.get_questions():
             curr_guesses = []
-            curr_guesses.append(question["correct_answer"])
+            curr_guesses.append(html.unescape(question["correct_answer"]))
             for guess in question["incorrect_answers"]:
-                curr_guesses.append(guess)
+                curr_guesses.append(html.unescape(guess))
             guesses.append(curr_guesses)
         print(guesses)
         return guesses
@@ -91,14 +89,8 @@ class Quiz:
     def get_answers(self) -> list:
         answers = []
         for question in self.get_questions():
-            answers.append(question["correct_answer"])
+            answers.append(html.unescape(question["correct_answer"]))
         return answers
-
-    def clean_text(self):
-        CLEANER = re.compile("<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});'")
-        for text in self.questions:
-            print(text)
-            text = re.sub(CLEANER, "", text["question"])
 
     def get_name(self) -> str:
         return self.name
